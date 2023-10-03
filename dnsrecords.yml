@@ -1,0 +1,31 @@
+---
+- name: create dns records from a vars file
+  hosts: ipa-server
+  vars_files:
+    - dns_vars.yml
+  vars_prompt:
+    name: adminpass
+    prompt: Enter IPA Admin password.
+    private: yes
+  tasks:
+    - name: create dns record on ipa server
+      ipa_dnsrecord:
+        name: "{{ item.host }}"
+        record_values: "{{ item.ipadd }}"
+        zone_name: "{{ item.zone }}"
+        state:  present
+        ipa_pass: "{{ adminpass }}"
+        ipa_user: admin
+        record_type: 'A'
+        validate_certs: true
+      loop: "{{ dns }}"
+   # - name: create reverse dns entry
+   #   ipa_dnsrecord:
+   #     ipa_pass: "{{ adminpass }}"
+   #     ipa_user: admin
+   #     zone_name: 
+   #     record_name: 
+   #     record_type: 'PTR'
+   #     record_value: 
+   #     state: present
+   #   loop: "{{ dns }}"
