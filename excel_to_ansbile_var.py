@@ -14,11 +14,11 @@ df = pd.read_excel(excel_file_path, engine='openpyxl', header=0)
 print(df.columns)
 
 def main():
-    menu = {'1.': 'Rename columns.', '2': 'Edit Data in Columns','3.': 'Assign Data To Vars File.', '4.': 'Build Ansible Vars file.', '5.': 'Quit the program.' }
+    menu = {'1.': 'Rename columns.', '2.': 'Edit Data in Columns','3.': 'Assign Data To Vars File.',
+             '4.': 'Build Ansible Vars file.', '5.': 'Special functions.', '6.': 'Write data to new excel file.', '7.': 'Quit the program.' }
     
     for key,value in menu.items():
         print(key,value)
-    
     user_choice = input("Select an option from the menu\n")
     if user_choice == '1':
         rename_columns()
@@ -28,7 +28,11 @@ def main():
         data_to_vars()
     elif user_choice == '4':
         build_file()
-    elif user_choice == '5' or user_choice.lower() == 'q':
+    elif user_choice == '5':
+        add_gateway()
+    elif user_choice == '6':
+        create_file()
+    elif user_choice == '7' or user_choice.lower() == 'q':
         exit(0)
     else:
         print("Not a valid choice")
@@ -40,11 +44,11 @@ def rename_columns():
     while modify_column != 'Q':
         os.system('cls')
         print(df.head())
-        modify_column = input("\n\n\nSelect a column to modify or 'Q' to quit to main menu.")
+        modify_column = input("\n\n\nSelect a column to modify or 'Q' to quit to main menu.\n")
         if modify_column.lower() == 'q':
             main()
         else:
-            new_name = input("Enter new column name or enter nothing to remove the column entirely.")
+            new_name = input("Enter new column name or enter nothing to remove the column entirely.\n")
             if new_name == '':
                 df.drop([modify_column], axis=1, inplace=True)
             else:    
@@ -58,15 +62,15 @@ def edit_row_data():
     column=''
     while column != 'Q':
         print(df.head())
-        column = input("\n\n\nSelect a column to modify or 'Q' to quit to main menu.")
+        column = input("\n\n\nSelect a column to modify or 'Q' to quit to main menu.\n")
         if column.lower() == 'q':
             main()
         else:
-            remove_pattern = input("Enter the pattern to remove from the columns.")
-            replace_pattern = input("Enter the pattern that will replace the removed pattern.")
+            remove_pattern = input("Enter the pattern to remove from the columns.\n")
+            replace_pattern = input("Enter the pattern that will replace the removed pattern.\n")
             df[column] = df[column].str.replace(remove_pattern, replace_pattern)
 
-
+#user chooses which columns to include in the final dataset. All others are automatically removed
 def data_to_vars():
     var_keys = []
     os.system('cls')
@@ -80,7 +84,8 @@ def data_to_vars():
                 var_keys.append(column_choice.lower())
                 column_choice = input()
     build_file(var_keys)
-    
+
+#Turns the dataset into ansible vars file. Columns are the keys and rows are the values.     
 def build_file(var_keys):
     os.system('cls')
     for i in df.columns:
@@ -105,6 +110,20 @@ def build_file(var_keys):
 
     print(f"Ansible variables file '{ansible_file_name}' has been created.")
     exit(0)
+
+def add_gateway():
+    print("To add a column for IP gateway, specify the IP address column or Q to quit to main menu.")
+    ip_column=input()
+    print("Enter a name for the gateway column ie. ops_gateway, oobm_gateway")
+    gateway_column = input()
+    df[gateway_column] = ''
+                                          
+    main()
+
+def create_file():
+    new_file = input("Input new file name. The .xlsx extension will be added automatically.")
+    df.to_excel(f"{new_file}.xlsx")
+    main()
 
 
 main()
